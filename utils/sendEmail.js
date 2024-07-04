@@ -1,30 +1,33 @@
-// Import the entire package and destructure TransactionalClient
-import pkg from '@mailchimp/mailchimp_transactional';
-const { TransactionalClient } = pkg;
+import nodemailer from 'nodemailer'
 
-// Import dotenv and configure it if not already done globally
-import dotenv from 'dotenv';
-dotenv.config();
+export const sendEmail = async (subject, message, send_to, sent_from, reply_to) => {
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: "587",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
 
-// Create an instance of TransactionalClient using your API key
-const mailchimp = new TransactionalClient(process.env.MAILCHIMP_API_KEY);
-
-// Define the sendEmail function to send an email
-export const sendEmail = async (subject, message, send_to, sent_from) => {
-  const msg = {
-    from_email: sent_from,
+  const options = {
+    from: sent_from,
+    to: send_to,
+    replyTo: reply_to,
     subject: subject,
-    to: [{ email: send_to }],
     html: message,
   };
 
-  try {
-    // Use mailchimp instance to send email
-    const result = await mailchimp.messages.send({ message: msg });
-    console.log('Email sent successfully:', result);
-    return result;
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw new Error('Failed to send email');
-  }
+  // Send Email
+  transporter.sendMail(options, function (err, info) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
 };
+

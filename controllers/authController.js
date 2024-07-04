@@ -33,7 +33,7 @@ export const registerUser = async (req, res) => {
       <p>Thank you for registering with our app.</p>
       <p>Enjoy using our services!</p>
     `;
-    await sendEmail(subject, message, email, process.env.MAILCHIMP_FROM_EMAIL);
+    await sendEmail(subject, message, email, process.env.EMAIL_USER, process.env.EMAIL_USER);
 
     res.status(201).json({
       msg: "Registration successful. Confirmation email sent.",
@@ -157,7 +157,7 @@ export const forgotPassword = async (req, res) => {
       <p>Your OTP for password reset is: ${otp}</p>
       <p>This OTP is valid for 1 hour.</p>
     `;
-    await sendEmail(subject, message, email, process.env.MAILCHIMP_FROM_EMAIL);
+    await sendEmail(subject, message, email, process.env.EMAIL_USER, process.env.EMAIL_USER);
 
     res.status(200).json({ message: "OTP sent to email." });
   } catch (error) {
