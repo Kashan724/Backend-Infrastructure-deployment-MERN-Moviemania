@@ -1,8 +1,7 @@
-import mailchimpTransactional from '@mailchimp/mailchimp_transactional';
+import { TransactionalClient } from '@mailchimp/mailchimp_transactional';
 
 
-const mailchimp = mailchimpTransactional;
-mailchimp.setApiKey(process.env.MAILCHIMP_API_KEY);
+const mailchimp = new TransactionalClient(process.env.MAILCHIMP_API_KEY);
 
 export const sendEmail = async (subject, message, send_to, sent_from) => {
   const msg = {
