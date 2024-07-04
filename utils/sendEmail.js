@@ -1,7 +1,9 @@
-import { TransactionalClient } from '@mailchimp/mailchimp_transactional';
+import mailchimpTransactional from '@mailchimp/mailchimp_transactional';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+const { TransactionalClient } = mailchimpTransactional;
 
 const mailchimp = new TransactionalClient(process.env.MAILCHIMP_API_KEY);
 
@@ -16,6 +18,7 @@ export const sendEmail = async (subject, message, send_to, sent_from) => {
   try {
     const result = await mailchimp.messages.send({ message: msg });
     console.log('Email sent successfully:', result);
+    return result;
   } catch (error) {
     console.error('Error sending email:', error);
     throw new Error('Failed to send email');
