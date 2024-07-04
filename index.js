@@ -38,7 +38,7 @@ app.use(session({
 app.use('/upload', express.static(path.join(__dirname, 'public/upload'))); // Serve static files from /upload
 
 app.use(cors({
-  origin: 'http://localhost:3000', // Replace with your frontend URL
+  origin: 'https://movie-mania-jet-gamma.vercel.app', // Replace with your frontend URL
   credentials: true,
 }));
 app.use('/public', express.static(path.join(__dirname, 'public'), {
