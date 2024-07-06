@@ -13,8 +13,6 @@ import { errorMiddleware } from './middlewares/error-middleware.js';
 import { connectDb } from './utils/connectDb.js';
 import session from 'express-session';
 
-
-
 /* CONFIGURATIONS */
 dotenv.config();
 
@@ -34,28 +32,29 @@ app.use(session({
   cookie: { secure: false } // Set to true if using HTTPS
 }));
 
-// Serve static files from the public directory
-app.use('/upload', express.static(path.join(__dirname, 'public/upload'))); // Serve static files from /upload
-
-app.use(cors({
-  origin: 'https://movie-mania-jet-gamma.vercel.app', // Replace with your frontend URL
-  credentials: true,
-}));
-app.use('/public', express.static(path.join(__dirname, 'public'), {
+// Serve static files from the /tmp/upload directory
+app.use('/upload', express.static('/tmp/upload', {
   setHeaders: (res, path, stat) => {
     res.set('Access-Control-Allow-Origin', '*'); // Set CORS headers
   }
 }));
 
-// Multer configuration for file upload
+app.use(cors({
+  origin: 'https://movie-mania-jet-gamma.vercel.app', // Replace with your frontend URL
+  credentials: true,
+}));
+
+// Multer configuration for file upload to /tmp directory
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    return cb(null, "./public/upload")
+    const uploadPath = '/tmp/upload';
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    return cb(null, `${Date.now()}_${file.originalname}`)
+    cb(null, `${Date.now()}_${file.originalname}`);
   }
-})
+});
 const upload = multer({ storage: storage });
 
 // Route for creating a new movie with file upload
