@@ -1,9 +1,6 @@
 import Movie from '../models/MovieModel.js'; // Adjust the path as needed
 import User from '../models/UserModel.js';
 import { v4 as uuidv4 } from 'uuid';
-import admin from 'firebase-admin';
-
-const bucket = admin.storage().bucket();
 
 // Function to create a new movie
 export const createMovie = async (req, res) => {
@@ -24,7 +21,7 @@ export const createMovie = async (req, res) => {
         }
 
         const originalname = req.file.originalname;
-        const blob = bucket.file(`${userId}/${uuidv4()}_${originalname}`); // Store in user-specific path
+        const blob = req.bucket.file(`${userId}/${uuidv4()}_${originalname}`); // Store in user-specific path
         const blobStream = blob.createWriteStream({
             metadata: {
                 contentType: req.file.mimetype
@@ -37,7 +34,7 @@ export const createMovie = async (req, res) => {
         });
 
         blobStream.on('finish', async () => {
-            const imagePath = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+            const imagePath = `https://storage.googleapis.com/${req.bucket.name}/${blob.name}`;
 
             const movie = new Movie({ 
                 userId, 
@@ -81,7 +78,7 @@ export const updateMovie = async (req, res) => {
 
         if (req.file) {
             const originalname = req.file.originalname;
-            const blob = bucket.file(`${req.user.id}/${uuidv4()}_${originalname}`); // Store in user-specific path
+            const blob = req.bucket.file(`${req.user.id}/${uuidv4()}_${originalname}`); // Store in user-specific path
             const blobStream = blob.createWriteStream({
                 metadata: {
                     contentType: req.file.mimetype
@@ -94,7 +91,7 @@ export const updateMovie = async (req, res) => {
             });
 
             blobStream.on('finish', async () => {
-                const imagePath = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+                const imagePath = `https://storage.googleapis.com/${req.bucket.name}/${blob.name}`;
                 updateData.imagePath = imagePath;
 
                 const updatedMovie = await Movie.findByIdAndUpdate(id, updateData, { new: true });
@@ -163,3 +160,12 @@ export const deleteMovie = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+export const getUserMovies = async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const post = await Movie.find({ userId });
+      res.status(200).json(post);
+    } catch (err) {
+      res.status(404).json({ message: err.message });
+    }
+  };

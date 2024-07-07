@@ -4,15 +4,14 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import cors from 'cors';
 import path from 'path';
-import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { createMovie } from './controllers/movieController.js';
+import session from 'express-session';
+import admin from 'firebase-admin';
 import authRoutes from './routes/authroutes.js';
 import movieRoutes from './routes/movieroutes.js';
 import { errorMiddleware } from './middlewares/error-middleware.js';
 import { connectDb } from './utils/connectDb.js';
-import session from 'express-session';
-import admin from 'firebase-admin';
+import { createMovie } from './controllers/movieController.js';
 
 // Load environment variables
 dotenv.config();
@@ -39,6 +38,7 @@ admin.initializeApp({
   }),
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET // Replace with your Firebase Storage bucket name
 });
+
 const bucket = admin.storage().bucket();
 
 app.use(express.json());
@@ -58,6 +58,13 @@ app.use(cors({
 const storage = multer.memoryStorage(); // Use memory storage for multer
 const upload = multer({ storage: storage });
 
+// Ensure bucket is available to the movieController
+app.use((req, res, next) => {
+  req.bucket = bucket;
+  next();
+});
+
+// Routes
 app.post('/api/movies', upload.single('imagePath'), createMovie);
 
 app.use('/api/auth', authRoutes);
